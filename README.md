@@ -34,6 +34,9 @@ cd USBTracker
 ```
 make && sudo make run
 ```
+```
+sudo mv usbtracker /usr/local/bin/
+```
 ## 🛠️ Linux setting
 ```
 sudo su
