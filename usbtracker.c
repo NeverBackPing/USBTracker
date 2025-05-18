@@ -56,7 +56,7 @@ int main(void)
     if (!udev)
     {
         fprintf(stderr, "Cannot create udev context\n");
-        return 1;
+        return (1);
     }
 
     struct udev_monitor *mon = udev_monitor_new_from_netlink(udev, "udev");
@@ -70,7 +70,7 @@ int main(void)
     {
         perror("Cannot open usbtracker.log");
         udev_unref(udev);
-        return 1;
+        return (1);
     }
 
     printf("USBTracker v2\n");
@@ -114,5 +114,5 @@ int main(void)
     fclose(logfile);
     udev_monitor_unref(mon);
     udev_unref(udev);
-    return 0;
+    return (0);
 }
