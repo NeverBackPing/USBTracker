@@ -12,7 +12,7 @@ void log_event(FILE *f, const char *action, struct udev_device *dev)
     struct timespec ts;
     clock_gettime(0, &ts);
     struct tm *tm_info = localtime(&ts.tv_sec);
-    strftime(timestamp, sizeof(timestamp), "%Y-%m-%dT%H:%M:%S", tm_info);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", tm_info);
 
     const char *devnode = udev_device_get_devnode(dev);
     const char *vendor = udev_device_get_sysattr_value(dev, "idVendor");
@@ -25,7 +25,7 @@ void log_event(FILE *f, const char *action, struct udev_device *dev)
 
     fprintf(f,
         "{\n"
-        "  \"timestamp\": \"%s.%03ld\",\n"
+        "  \"timestamp\": \"%s.%02ld\",\n"
         "  \"action\": \"%s\",\n"
         "  \"devnode\": \"%s\",\n"
         "  \"vendor\": \"%s\",\n"
@@ -36,7 +36,7 @@ void log_event(FILE *f, const char *action, struct udev_device *dev)
         "  \"speed\": \"%s\",\n"
         "  \"product_name\": \"%s\"\n"
         "},\n",
-        timestamp, ts.tv_nsec / 1000000,
+        timestamp, ts.tv_nsec / 10000000,
         action ? action : "unknown",
         devnode ? devnode : "unknown",
         vendor ? vendor : "unknown",
@@ -65,7 +65,7 @@ int main(void)
 
     int fd = udev_monitor_get_fd(mon);
 
-    FILE *logfile = fopen("usbtracker.log", "w");
+    FILE *logfile = fopen("/var/log/usbtracker.log", "a");
     if (!logfile)
     {
         perror("Cannot open usbtracker.log");
@@ -73,9 +73,7 @@ int main(void)
         return 1;
     }
 
-    fprintf(logfile, "[\n");
-
-    printf("USBTracker v2 démarré - collecte avancée\n");
+    printf("USBTracker v2\n");
 
     int first_entry = 1;
 
@@ -98,22 +96,21 @@ int main(void)
             if (dev)
             {
                 const char *action = udev_device_get_action(dev);
-
-                if (!first_entry)
-                    fprintf(logfile, ",\n");
-                else
-                    first_entry = 0;
-
-                log_event(logfile, action, dev);
-
-                printf("Event: %s on %s\n", action ? action : "unknown", udev_device_get_devnode(dev));
-
+                const char *devnode = udev_device_get_devnode(dev);
+                if (!strcmp(action, "bind") && devnode)
+                {
+                    if (!first_entry)
+                        fprintf(logfile, "\n");
+                    else
+                        first_entry = 0;
+                    
+                    log_event(logfile, action, dev);
+                }
                 udev_device_unref(dev);
             }
         }
     }
-
-    fprintf(logfile, "\n]\n");
+    fprintf(logfile, "\n");
     fclose(logfile);
     udev_monitor_unref(mon);
     udev_unref(udev);
