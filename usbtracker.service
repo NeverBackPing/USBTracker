@@ -1,0 +1,11 @@
+[Unit]
+Description=UBS Tracker Service
+After=local-fs.target
+
+[Service]
+ExecStart=/usr/local/bin/usbtracker
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
