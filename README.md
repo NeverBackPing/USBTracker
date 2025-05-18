@@ -37,7 +37,7 @@ make && sudo make run
 ```
 sudo mv usbtracker /usr/local/bin/
 ```
-## 🛠️ Linux setting
+## 🐧 Linux setting
 ```
 sudo su
 ```
